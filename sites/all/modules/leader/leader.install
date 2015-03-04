@@ -1,0 +1,24 @@
+<?php
+
+function leader_uninstall() {
+    cache_clear_all('leader', 'cache', TRUE);
+    drupal_uninstall_schema('leader');
+
+}
+
+function leader_schema(){
+    $schema = array();
+    $schema['leader'] = array(
+        'fields' => array(
+            'id'            => array('type'=>'serial',  'size'    =>'normal',   'not null' => TRUE),
+            'question'      => array('type'=>'text',    'not null'=> TRUE),
+            'completely'    => array('type'=>'text',     'not null'=> TRUE),
+            'mostly'        => array('type'=>'text',     'not null'=> TRUE),
+            'somewhat'      => array('type'=>'text',     'not null'=> TRUE),
+            'little'        => array('type'=>'text',     'not null'=> TRUE),
+            'notall'        => array('type'=>'text',     'not null'=> TRUE)
+        ),
+        'primary key' => array('id')
+    );
+    return $schema;
+}

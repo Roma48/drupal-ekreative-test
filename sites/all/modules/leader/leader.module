@@ -1,0 +1,195 @@
+<?php
+
+function leader_block_info() {
+    $blocks[ 'leader' ] = array(
+        'info' => "Leader Test"
+    );
+    return $blocks;
+}
+
+function leader_block_view( $delta = '' ) {
+    switch ($delta) {
+        case 'leader':
+            $block[ 'content' ] = leader_block();
+            break;
+    }
+    return $block;
+}
+
+
+
+function leader_block() {
+    $output = drupal_get_form('question_form');
+    $output = drupal_render($output);
+    $output = theme('leader', array( 'form' => $output));
+    return $output;
+}
+
+function question_form($form, &$form_state){
+    $form = '';
+    $q = $_GET{'qid'};
+    if ($q < 1 ){
+        $q = 1;
+    }
+    $question = db_select('leader','n');
+    $question->fields('n',array('question'));
+    $question->condition('n.id', $q);
+    $res_question = $question->execute()->fetchAll();
+    $output = '';
+
+    foreach($res_question as $question){
+        $output .= $question->question;
+    }
+
+    $form['question'] = array(
+        '#markup' => $output
+    );
+
+    $form['completely'] = array(
+        '#type' => 'checkbox',
+        '#return_value' => '1',
+        '#title_display' => 'after',
+        '#title' => t('Completely true')
+    );
+
+    $form['mostly'] = array(
+        '#type' => 'checkbox',
+        '#return_value' => '1',
+        '#title_display' => 'after',
+        '#title' => t('Mostly true')
+    );
+
+    $form['somewhat'] = array(
+        '#type' => 'checkbox',
+        '#return_value' => '1',
+        '#title_display' => 'after',
+        '#title' => t('Somewhat true')
+    );
+
+    $form['little'] = array(
+        '#type' => 'checkbox',
+        '#return_value' => '1',
+        '#title_display' => 'after',
+        '#title' => t('A little true')
+    );
+
+    $form['notall'] = array(
+        '#type' => 'checkbox',
+        '#return_value' => '1',
+        '#title_display' => 'after',
+        '#title' => t('Not at all true')
+    );
+
+    $form['submit'] = array(
+        '#type'  => 'submit',
+        '#value' => t('Continue'),
+    );
+
+    $my = variable_get('form');
+    var_dump($my);
+    return $form;
+
+}
+
+function question_form_submit($form, &$form_state){
+
+    $question = $_GET{'qid'};
+
+    if ($question < 1){
+        $question = 2;
+    } else {
+        $question++;
+    }
+    drupal_goto('leader-test', array('query' => array('qid' => $question)));
+}
+
+
+function leader_theme() {
+    return array(
+        'leader' => array(
+            'template'  =>  'leader',
+            'variables' =>  ''
+        )
+    );
+}
+
+function leader_menu() {
+    $items = array();
+
+    $items['leader'] = array(
+        'title'             => 'Leader Test',
+        'page callback'     => 'drupal_get_form',
+        'page arguments'    => array('add_leader_test_form'),
+        'access callback'   => TRUE,
+
+    );
+
+    $items['leader-test'] = array(
+        'title'             => 'Leader Test Run',
+        'page callback'     => 'leader_block',
+        'access callback'   => TRUE,
+
+    );
+
+    return $items;
+}
+
+function add_leader_test_form($form, &$form_state) {
+
+    $form['question'] = array(
+        '#title' => t('Question'),
+        '#type'  => 'textfield',
+    );
+
+    $form['completely'] = array(
+        '#title' => t('Completely true'),
+        '#type'  => 'textfield',
+    );
+
+    $form['mostly'] = array(
+        '#title' => t('Mostly true'),
+        '#type'  => 'textfield',
+    );
+
+    $form['somewhat'] = array(
+        '#title' => t('Somewhat true'),
+        '#type'  => 'textfield',
+    );
+
+    $form['little'] = array(
+        '#title' => t('A little true'),
+        '#type'  => 'textfield',
+    );
+
+    $form['notall'] = array(
+        '#title' => t('Not at all true'),
+        '#type'  => 'textfield',
+    );
+
+    $form['submit'] = array(
+        '#type'  => 'submit',
+        '#value' => t('Continue'),
+    );
+
+    return $form;
+}
+
+function add_leader_test_form_submit($form, &$form_state){
+
+    $result = db_insert('leader')
+        ->fields(array(
+                'question'      => $form_state['values']['question'],
+                'completely'    => $form_state['values']['completely'],
+                'mostly'        => $form_state['values']['mostly'],
+                'somewhat'      => $form_state['values']['somewhat'],
+                'little'        => $form_state['values']['little'],
+                'notall'        => $form_state['values']['notall']
+            )
+        )
+        ->execute();
+
+    drupal_goto('leader');
+
+
+}
+
